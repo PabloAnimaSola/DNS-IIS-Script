@@ -46,8 +46,8 @@ echo "Estructura de directorio creada"
 #############
 ## Crear los hosts virtuales para cada dominio ##
 cd /etc/apache2/sites-available/
-cp 000-default.conf "$confPagina"
-cp default-ssl.conf "$confSecPagina"
+cp /var/www/html/000-default.conf "$confPagina"
+cp var/www/html/default-ssl.conf "$confSecPagina"
 a2ensite "$confPagina" && systemctl restart apache2
 echo "Añadidos los archivos de configuración y apache reiniciado"
 #############
@@ -65,7 +65,8 @@ echo "Configurando SSL..."
 a2ensite "$confSecPagina"
 a2enmod ssl
 openssl genrsa -des3 -out "$keyPagina"
-openssl x509 -req -days 365 -in "$csrPagina" -signkey "$keyPagina" -out "$crtPagina"
+openssl req -new -key "$keyPagina" -out "$csrPagina"
+openssl x509 -req -days 365 -in "$crtPagina" -signkey "$keyPagina" -out "$crtPagina"
 cp "$keyPagina" /etc/ssl/private/
 cp "$crtPagina" /etc/ssl/certs/
 #############

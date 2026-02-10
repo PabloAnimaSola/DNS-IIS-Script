@@ -28,7 +28,7 @@ read -p "Introduce el nombre de la página web sin el dominio (Ej: realzaragoza)
 read -p "Ahora introduce el tipo de dominio (Ej: org, edu, com, es): " dominio
 #############
 ## Creación de las variables de páginas del dominio ##
-nombreCompleto=$nombrePagina"."$dominio"
+nombreCompleto=$nombrePagina."$dominio"
 confPagina=$dominio".conf"
 confSecPagina=$dominio"-ssl.conf"
 csrPagina=$nombrePagina".csr"

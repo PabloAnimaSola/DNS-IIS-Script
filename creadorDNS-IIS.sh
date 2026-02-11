@@ -14,6 +14,7 @@ confPagina=""
 confSecPagina=""
 csrPagina=""
 crtPagina=""
+confDNS="named.conf.options"
 ##############
 ## Introducción ##
 clear
@@ -64,6 +65,7 @@ systemctl reload apache2
 echo "Configurando SSL..."
 a2ensite "$confSecPagina"
 a2enmod ssl
+echo "SSL Activado, escribe la contraseña de la key:"
 openssl genrsa -des3 -out "$keyPagina"
 openssl req -new -key "$keyPagina" -out "$csrPagina"
 openssl x509 -req -days 365 -in "$csrPagina" -signkey "$keyPagina" -out "$crtPagina"
@@ -78,3 +80,12 @@ sed -i $"31c\\\tSSLCertificateFile\\t/etc/ssl/certs/$crtPagina" "$confSecPagina"
 sed -i $"32c\\\tSSLCertificateKeyFile\\t/etc/ssl/private/$keyPagina" "$confSecPagina"
 sed -i $"94c\\\SSLOptions +FakeBasicAuth +ExportCertData +StrictRequire" "$confSecPagina"
 #############
+echo "Configuración ya añadida, reiniciando apache."
+systemctl restart apache2
+## Configuración de DNS ##
+cd /etc/bind/
+sed -i $"13c\\\tforwarders {" "$confDNS"
+sed -i $"14c\\\t\t8.8.8.8;" "$confDNS"
+sed -i $"15c\\\t\t1.1.1.1;" "$confDNS"
+sed -i $"16c\\\t\t8.8.4.4;" "$confDNS"
+sed -i $"17c\\\t};" "$confDNS"

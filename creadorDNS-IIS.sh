@@ -30,8 +30,8 @@ read -p "Ahora introduce el tipo de dominio (Ej: org, edu, com, es): " dominio
 #############
 ## Creación de las variables de páginas del dominio ##
 nombreCompleto=$nombrePagina."$dominio"
-confPagina=$dominio".conf"
-confSecPagina=$dominio"-ssl.conf"
+confPagina=$nombreCompleto".conf"
+confSecPagina=$nombreCompleto"-ssl.conf"
 csrPagina=$nombrePagina".csr"
 keyPagina=$nombrePagina".key"
 crtPagina=$nombrePagina".crt"
@@ -78,7 +78,7 @@ sed -i $"3c\\\tDirectoryIndex index.html" "$confSecPagina"
 sed -i $"4c\\\tDocumentRoot /var/www/$dominio" "$confSecPagina"
 sed -i $"31c\\\tSSLCertificateFile\\t/etc/ssl/certs/$crtPagina" "$confSecPagina"
 sed -i $"32c\\\tSSLCertificateKeyFile\\t/etc/ssl/private/$keyPagina" "$confSecPagina"
-sed -i $"94c\\\SSLOptions +FakeBasicAuth +ExportCertData +StrictRequire" "$confSecPagina"
+sed -i $"94c\\\tSSLOptions +FakeBasicAuth +ExportCertData +StrictRequire" "$confSecPagina"
 #############
 echo "Configuración ya añadida, reiniciando apache."
 systemctl restart apache2

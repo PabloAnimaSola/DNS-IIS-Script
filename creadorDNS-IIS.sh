@@ -40,8 +40,8 @@ read -p "Ahora introduce la direccion IP que tendrá la página web SIN LA MÁSC
 echo "Tu netplan tiene que tener ya configurado el adaptador con la dirección y el DNS establecido"
 #############
 ## Creación de la estructura del directorio ##
-mkdir -p /var/www/"$dominio"
-sudo cp /var/www/html/index.html /var/www/"$dominio"/index.html
+mkdir -p /var/www/"$nombrePagina"
+sudo cp /var/www/html/index.html /var/www/"$nombrePagina"/index.html
 echo "Estructura de directorio creada"
 #############
 ## Crear los hosts virtuales para cada dominio ##
@@ -66,7 +66,7 @@ a2ensite "$confSecPagina"
 a2enmod ssl
 openssl genrsa -des3 -out "$keyPagina"
 openssl req -new -key "$keyPagina" -out "$csrPagina"
-openssl x509 -req -days 365 -in "$crtPagina" -signkey "$keyPagina" -out "$crtPagina"
+openssl x509 -req -days 365 -in "$csrOPagina" -signkey "$keyPagina" -out "$crtPagina"
 cp "$keyPagina" /etc/ssl/private/
 cp "$crtPagina" /etc/ssl/certs/
 #############

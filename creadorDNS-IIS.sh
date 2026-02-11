@@ -46,8 +46,8 @@ echo "Estructura de directorio creada"
 #############
 ## Crear los hosts virtuales para cada dominio ##
 cd /etc/apache2/sites-available/
-cp /var/www/html/000-default.conf "$confPagina"
-cp var/www/html/default-ssl.conf "$confSecPagina"
+cp 000-default.conf "$confPagina"
+cp default-ssl.conf "$confSecPagina"
 a2ensite "$confPagina" && systemctl restart apache2
 echo "Añadidos los archivos de configuración y apache reiniciado"
 #############

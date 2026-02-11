@@ -15,6 +15,15 @@ confSecPagina=""
 csrPagina=""
 crtPagina=""
 confDNS="named.conf.options"
+DIRECTORY="/etc/bind/zones"
+##############
+## Funciones ##
+creacion_dns(){
+	
+}
+recarga_apache(){
+	systemctl restart apache2
+}
 ##############
 ## Introducción ##
 clear
@@ -49,7 +58,7 @@ echo "Estructura de directorio creada"
 cd /etc/apache2/sites-available/
 cp 000-default.conf "$confPagina"
 cp default-ssl.conf "$confSecPagina"
-a2ensite "$confPagina" && systemctl restart apache2
+a2ensite "$confPagina" && recarga_apache
 echo "Añadidos los archivos de configuración y apache reiniciado"
 #############
 ## Cambio de la página de configuración ##
@@ -81,7 +90,7 @@ sed -i $"32c\\\tSSLCertificateKeyFile\\t/etc/ssl/private/$keyPagina" "$confSecPa
 sed -i $"94c\\\tSSLOptions +FakeBasicAuth +ExportCertData +StrictRequire" "$confSecPagina"
 #############
 echo "Configuración ya añadida, reiniciando apache."
-systemctl restart apache2
+recarga_apache
 ## Configuración de DNS ##
 cd /etc/bind/
 sed -i $"13c\\\tforwarders {" "$confDNS"
@@ -92,3 +101,15 @@ sed -i $"17c\\\t};" "$confDNS"
 sed -i $"24c\\\tlisten-on { any; };" "$confDNS"
 sed -i '$a\	allow-query { any; };' "$confDNS"
 sed -i '$a\};' "$confDNS"
+#############
+## Creación de la carpeta zones y copia de archivos ##
+echo "DNS Configurado, creando carpeta zones."
+if [ -d "$DIRECTORY" ]; then
+	echo "$DIRECTORY ya existe, creando dentro de la carpeta."
+	cd "$DIRECTORY"
+	creacion_dns
+else
+	echo "$DIRECTORY NO existe, creando carpeta y editando."
+	mkdir "$DIRECTORY" && cd "$DIRECTORY"
+	creacion_dns
+fi

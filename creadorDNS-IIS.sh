@@ -7,6 +7,7 @@ fi
 ## Declaración de Variables ##
 equipo=$(hostname)
 IP=""
+IPInv=""
 nombrePagina=""
 dominio=""
 nombreCompleto=""
@@ -15,7 +16,7 @@ confSecPagina=""
 csrPagina=""
 crtPagina=""
 confDNS="named.conf.options"
-DIRECTORY="/etc/bind/zones"
+zonas="/etc/bind/zones"
 ##############
 ## Funciones ##
 creacion_dns(){
@@ -47,6 +48,7 @@ crtPagina=$nombrePagina".crt"
 #############
 ## Solicitud de la IP sin máscara ##
 read -p "Ahora introduce la direccion IP que tendrá la página web SIN LA MÁSCARA: " IP
+read -p "Escribe su dirección de zona inversa: (Ej: 192.168.20.10/16 -> 10.20)" IPInv
 echo "Tu netplan tiene que tener ya configurado el adaptador con la dirección y el DNS establecido"
 #############
 ## Creación de la estructura del directorio ##
@@ -104,12 +106,12 @@ sed -i '$a\};' "$confDNS"
 #############
 ## Creación de la carpeta zones y copia de archivos ##
 echo "DNS Configurado, creando carpeta zones."
-if [ -d "$DIRECTORY" ]; then
-	echo "$DIRECTORY ya existe, creando dentro de la carpeta."
-	cd "$DIRECTORY"
+if [ -d "$zonas" ]; then
+	echo "El directorio de zonas ya existe, creando dentro de la carpeta."
+	cd "$zonas"
 	creacion_dns
 else
-	echo "$DIRECTORY NO existe, creando carpeta y editando."
-	mkdir "$DIRECTORY" && cd "$DIRECTORY"
+	echo "La carpeta de zonas NO existe, creando carpeta y editando."
+	mkdir "$zonas" && cd "$zonas"
 	creacion_dns
 fi

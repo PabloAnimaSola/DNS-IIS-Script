@@ -41,7 +41,7 @@ echo "Tu netplan tiene que tener ya configurado el adaptador con la dirección y
 #############
 ## Creación de la estructura del directorio ##
 mkdir -p /var/www/"$dominio"
-sudo cp /var/www/"$dominio"/index.html /var/www/"$dominio"
+sudo cp /var/www/html/index.html /var/www/"$dominio"/index.html
 echo "Estructura de directorio creada"
 #############
 ## Crear los hosts virtuales para cada dominio ##

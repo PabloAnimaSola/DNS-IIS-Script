@@ -66,7 +66,7 @@ a2ensite "$confSecPagina"
 a2enmod ssl
 openssl genrsa -des3 -out "$keyPagina"
 openssl req -new -key "$keyPagina" -out "$csrPagina"
-openssl x509 -req -days 365 -in "$csrOPagina" -signkey "$keyPagina" -out "$crtPagina"
+openssl x509 -req -days 365 -in "$csrPagina" -signkey "$keyPagina" -out "$crtPagina"
 cp "$keyPagina" /etc/ssl/private/
 cp "$crtPagina" /etc/ssl/certs/
 #############

@@ -23,12 +23,12 @@ zonas="/etc/bind/zones"
 creacion_dns(){
 cat >> "$confZonasDNS" <<EOF
 
-zone $nombreCompleto {
+zone "\$nombreCompleto\" {
 	type master;
 	file "/etc/bind/zones/db.$nombrePagina";
 };
 
-zone $IPInv {
+zone "${IPInv}.in-addr.arpa" {
 	type master;
 	file "/etc/bind/zones/db.$dirIPInv";
 };
@@ -53,17 +53,17 @@ read -p "Introduce el nombre de la página web sin el dominio (Ej: realzaragoza)
 read -p "Ahora introduce el tipo de dominio (Ej: org, edu, com, es): " dominio
 #############
 ## Creación de las variables de páginas del dominio ##
-nombreCompleto=$nombrePagina."$dominio"
-confPagina=$nombreCompleto".conf"
-confSecPagina=$nombreCompleto"-ssl.conf"
-csrPagina=$nombrePagina".csr"
-keyPagina=$nombrePagina".key"
-crtPagina=$nombrePagina".crt"
+nombreCompleto=${nombrePagina}."$dominio"
+confPagina=${nombreCompleto}".conf"
+confSecPagina=${nombreCompleto}"-ssl.conf"
+csrPagina=${nombrePagina}".csr"
+keyPagina=${nombrePagina}".key"
+crtPagina=${nombrePagina}".crt"
 #############
 ## Solicitud de la IP sin máscara e IP inversa##
 read -p "Ahora introduce la direccion IP que tendrá la página web SIN LA MÁSCARA: " IP
 read -p "Escribe su dirección de zona inversa (Ej: 192.168.20.10/16 -> 10.20): " IPInv
-dirIPInv=$IPInv".in-addr.arpa"
+dirIPInv=${IPInv}".in-addr.arpa"
 echo "Tu netplan tiene que tener ya configurado el adaptador con la dirección y el DNS establecido"
 #############
 ## Creación de la estructura del directorio ##
@@ -120,12 +120,12 @@ sed -i '$a\	allow-query { any; };' "$confFWDNS"
 sed -i '$a\};' "$confFWDNS"
 #############
 ## Creación de la carpeta zones y copia de archivos ##
-echo "DNS Configurado, creando carpeta zones."
+echo "DNS Configurado, buscando carpeta zones."
 if [ -d "$zonas" ]; then
-	echo "El directorio de zonas ya existe, creando dentro de la carpeta."
+	echo "El directorio de zones ya existe, creando dentro de la carpeta."
 	creacion_dns
 else
-	echo "La carpeta de zonas NO existe, creando carpeta y editando."
+	echo "La carpeta de zones NO existe, creando carpeta y editando."
 	mkdir "$zonas"
 	creacion_dns
 fi

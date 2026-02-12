@@ -21,13 +21,20 @@ zonas="/etc/bind/zones"
 ##############
 ## Funciones ##
 creacion_dns(){
-	sed -i '$a\zone $nombreCompleto {' "$confZonasDNS"
-	sed -i '$a\	type master;' "$confZonasDNS"
-	sed -i '$a\	file "/etc/bind/zones/db.$nombrePagina";}' "$confZonasDNS"
-	sed -i '$a\zone "$(IPInv)" {' "$confZonasDNS"
-	sed -i '$a\	type master;' "$confZonasDNS"
-	sed -i '$a\	file "/etc/bind/zones/db.$dirIPInv";' "$confZonasDNS"
-	sed -i '$a\}' "$confZonasDNS"
+cat >> "$confZonasDNS" <<EOF
+
+zone $nombreCompleto {
+	type master;
+	file "/etc/bind/zones/db.$nombrePagina";
+};
+
+zone $IPInv {
+	type master;
+	file "/etc/bind/zones/db.$dirIPInv";
+};
+
+EOF
+
 }
 recarga_apache(){
 	systemctl restart apache2

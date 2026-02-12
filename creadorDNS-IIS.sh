@@ -20,7 +20,13 @@ zonas="/etc/bind/zones"
 ##############
 ## Funciones ##
 creacion_dns(){
-	
+	sed -i '$a\zone "$nombreCompleto" {'
+	sed -i '$a\	type master;'
+	sed -i '$a\	file "/etc/bind/zones/db."$nombrePagina"";}'
+	sed -i '$a\zone ""$IPInv"" {'
+	sed -i '$a\	type master;'
+	sed -i '$a\	file "/etc/bind/zones/db."$dirIPInv"";'
+	sed -i '$a\}'
 }
 recarga_apache(){
 	systemctl restart apache2
@@ -46,9 +52,10 @@ csrPagina=$nombrePagina".csr"
 keyPagina=$nombrePagina".key"
 crtPagina=$nombrePagina".crt"
 #############
-## Solicitud de la IP sin máscara ##
+## Solicitud de la IP sin máscara e IP inversa##
 read -p "Ahora introduce la direccion IP que tendrá la página web SIN LA MÁSCARA: " IP
 read -p "Escribe su dirección de zona inversa: (Ej: 192.168.20.10/16 -> 10.20)" IPInv
+dirIPInv=$IPInv".in-addr.arpa"
 echo "Tu netplan tiene que tener ya configurado el adaptador con la dirección y el DNS establecido"
 #############
 ## Creación de la estructura del directorio ##

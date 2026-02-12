@@ -25,7 +25,7 @@ cat >> "$confZonasDNS" <<EOF
 
 zone "$nombreCompleto" {
 	type master;
-	file "/etc/bind/zones/db.${nombrePagina}";
+	file "/etc/bind/zones/db.${nombreCompleto}.conf";
 };
 
 zone "${IPInv}.in-addr.arpa" {
@@ -130,5 +130,8 @@ else
 	mkdir "$zonas"
 	creacion_dns
 fi
-############
+#############
 ## Copiar los archivos de las zonas y editarlas ##
+echo "Copiando archivos de plantilla db. ..."
+cp db.local zones/db.${nombreCompleto}.conf && cp db.127 zones/db.${dirIPInv}
+#############

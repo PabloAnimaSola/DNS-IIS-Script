@@ -23,14 +23,14 @@ zonas="/etc/bind/zones"
 creacion_dns(){
 cat >> "$confZonasDNS" <<EOF
 
-zone "\$nombreCompleto\" {
+zone "$nombreCompleto" {
 	type master;
-	file "/etc/bind/zones/db.$nombrePagina";
+	file "/etc/bind/zones/db.${nombrePagina}";
 };
 
 zone "${IPInv}.in-addr.arpa" {
 	type master;
-	file "/etc/bind/zones/db.$dirIPInv";
+	file "/etc/bind/zones/db.${dirIPInv}";
 };
 
 EOF

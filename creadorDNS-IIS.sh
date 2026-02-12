@@ -116,10 +116,9 @@ sed -i '$a\};' "$confFWDNS"
 echo "DNS Configurado, creando carpeta zones."
 if [ -d "$zonas" ]; then
 	echo "El directorio de zonas ya existe, creando dentro de la carpeta."
-	cd "$zonas"
 	creacion_dns
 else
 	echo "La carpeta de zonas NO existe, creando carpeta y editando."
-	mkdir "$zonas" && cd "$zonas"
+	mkdir "$zonas"
 	creacion_dns
 fi

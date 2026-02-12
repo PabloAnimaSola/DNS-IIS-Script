@@ -15,18 +15,19 @@ confPagina=""
 confSecPagina=""
 csrPagina=""
 crtPagina=""
-confDNS="named.conf.options"
+confFWDNS="named.conf.options"
+confZonasDNS="named.conf.local"
 zonas="/etc/bind/zones"
 ##############
 ## Funciones ##
 creacion_dns(){
-	sed -i '$a\zone "$nombreCompleto" {'
-	sed -i '$a\	type master;'
-	sed -i '$a\	file "/etc/bind/zones/db."$nombrePagina"";}'
-	sed -i '$a\zone ""$IPInv"" {'
-	sed -i '$a\	type master;'
-	sed -i '$a\	file "/etc/bind/zones/db."$dirIPInv"";'
-	sed -i '$a\}'
+	sed -i '$a\zone "$nombreCompleto" {' "$confZonasDNS"
+	sed -i '$a\	type master;' "$confZonasDNS"
+	sed -i '$a\	file "/etc/bind/zones/db."$nombrePagina"";}' "$confZonasDNS"
+	sed -i '$a\zone ""$IPInv"" {' "$confZonasDNS"
+	sed -i '$a\	type master;' "$confZonasDNS"
+	sed -i '$a\	file "/etc/bind/zones/db."$dirIPInv"";' "$confZonasDNS"
+	sed -i '$a\}' "$confZonasDNS"
 }
 recarga_apache(){
 	systemctl restart apache2
@@ -102,14 +103,14 @@ echo "Configuración ya añadida, reiniciando apache."
 recarga_apache
 ## Configuración de DNS ##
 cd /etc/bind/
-sed -i $"13c\\\tforwarders {" "$confDNS"
-sed -i $"14c\\\t\t8.8.8.8;" "$confDNS"
-sed -i $"15c\\\t\t1.1.1.1;" "$confDNS"
-sed -i $"16c\\\t\t8.8.4.4;" "$confDNS"
-sed -i $"17c\\\t};" "$confDNS"
-sed -i $"24c\\\tlisten-on { any; };" "$confDNS"
-sed -i '$a\	allow-query { any; };' "$confDNS"
-sed -i '$a\};' "$confDNS"
+sed -i $"13c\\\tforwarders {" "$confFWDNS"
+sed -i $"14c\\\t\t8.8.8.8;" "$confFWDNS"
+sed -i $"15c\\\t\t1.1.1.1;" "$confFWDNS"
+sed -i $"16c\\\t\t8.8.4.4;" "$confFWDNS"
+sed -i $"17c\\\t};" "$confFWDNS"
+sed -i $"24c\\\tlisten-on { any; };" "$confFWDNS"
+sed -i '$a\	allow-query { any; };' "$confFWDNS"
+sed -i '$a\};' "$confFWDNS"
 #############
 ## Creación de la carpeta zones y copia de archivos ##
 echo "DNS Configurado, creando carpeta zones."

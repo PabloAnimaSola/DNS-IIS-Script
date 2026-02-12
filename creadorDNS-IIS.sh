@@ -35,6 +35,7 @@ zone "${IPInv}.in-addr.arpa" {
 
 EOF
 
+echo "¡Zonas creadas!"
 }
 recarga_apache(){
 	systemctl restart apache2
@@ -119,13 +120,15 @@ sed -i $"24c\\\tlisten-on { any; };" "$confFWDNS"
 sed -i '$a\	allow-query { any; };' "$confFWDNS"
 sed -i '$a\};' "$confFWDNS"
 #############
-## Creación de la carpeta zones y copia de archivos ##
-echo "DNS Configurado, buscando carpeta zones."
+## Editar named.config.local para añadir las zonas directa e inversa ##
+echo "Forwarders del DNS Configurado, creando zonas del DNS."
 if [ -d "$zonas" ]; then
-	echo "El directorio de zones ya existe, creando dentro de la carpeta."
+	echo "El directorio de zones ya existe, editando named.config.local."
 	creacion_dns
 else
-	echo "La carpeta de zones NO existe, creando carpeta y editando."
+	echo "La carpeta de zones NO existe, creando carpeta y editando named.config.local."
 	mkdir "$zonas"
 	creacion_dns
 fi
+############
+## Copiar los archivos de las zonas y editarlas ##

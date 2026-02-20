@@ -37,8 +37,8 @@ EOF
 
 echo "¡Zonas creadas!"
 }
-recarga_apache(){
-	systemctl restart apache2
+recargar(){
+	systemctl restart $1
 }
 ##############
 ## Introducción ##
@@ -108,7 +108,7 @@ sed -i $"32c\\\tSSLCertificateKeyFile\\t/etc/ssl/private/$keyPagina" "$confSecPa
 sed -i $"94c\\\tSSLOptions +FakeBasicAuth +ExportCertData +StrictRequire" "$confSecPagina"
 #############
 echo "Configuración ya añadida, reiniciando apache."
-recarga_apache
+recargar "apache2"
 ## Configuración de DNS ##
 cd /etc/bind/
 sed -i $"13c\\\tforwarders {" "$confFWDNS"
@@ -135,3 +135,18 @@ fi
 echo "Copiando archivos de plantilla db. ..."
 cp db.local zones/db.${nombreCompleto}.conf && cp db.127 zones/db.${dirIPInv}
 #############
+## Editar la zona directa y inversa ##
+echo "Editando zona directa y inversa..."
+cd /etc/bind/zones
+sed -i $"5c\\@\tIN\tSOA\t${nombreCompleto}.\troot.${nombreCompleto}.  (" "db.${nombreCompleto}"
+sed -i $"6c\\\t\t\t    100\t \t; Serial" "db.${nombreCompleto}"
+sed -i $"12c\\@\tIN\tNS\t${equipo}." "db.${nombreCompleto}"
+sed -i $"13c\\www\tIN\tCNAME\t${nombreCompleto}." "db.${nombreCompleto}"
+echo "¡Zona directa configurada!"
+echo "Configurando zona inversa..."
+##
+sed -i $"5c\\@\tIN\tSOA\t${nombreCompleto}.\troot.${nombreCompleto}.  (" "db.${dirIPInv}"
+sed -i $"6c\\\t\t\t    100\t \t; Serial" "db.${dirIPInv}"
+sed -i $"12c\\@\tIN\tNS\t${equipo}." "db.${dirIPInv}"
+sed -i $"13c\\${IPInv}\tIN\tPTR\t${equipo}.${nombreCompleto}" "db.${dirIPInv}"
+recargar "bind9"

@@ -4,6 +4,7 @@ if [[ $EUID -ne 0 ]]; then
   echo "Tienes que correr el script con root. Usa sudo. (sudo ./creadorDNS-IIS.sh)" >&2
   exit 1
 fi
+
 ## Declaración de Variables ##
 equipo=$(hostname)
 IP=""
@@ -18,6 +19,7 @@ crtPagina=""
 confFWDNS="named.conf.options"
 confZonasDNS="named.conf.local"
 zonas="/etc/bind/zones"
+
 ##############
 ## Funciones ##
 creacion_dns(){
@@ -37,56 +39,66 @@ EOF
 
 echo "¡Zonas creadas!"
 }
+
 recargar(){
-	systemctl restart $1
+	systemctl restart "$1"
 }
+
 ##############
 ## Introducción ##
 clear
 echo "Bienvenido al script de creación de páginas de IIS y vinculación de DNS"
 echo "Antes de continuar, asegúrate de tener instalado apache2, bind9, y ufw (sudo apt install apache2 bind9 ufw)"
 echo "Necesitas también tener la estructura básica de las carpetas de bind y apache (zonas y el nombre de la página respectivamente)."
-echo "Eres la máquina" "$equipo"
+echo "Eres la máquina $equipo"
 read -p "Introduce cualquier cosa para continuar..." Confirmar
+
 #############
 ## Solicitud de los nombres de las zonas y direcciones IP ##
 read -p "Introduce el nombre de la página web sin el dominio (Ej: realzaragoza): " nombrePagina
 read -p "Ahora introduce el tipo de dominio (Ej: org, edu, com, es): " dominio
+
 #############
 ## Creación de las variables de páginas del dominio ##
-nombreCompleto=${nombrePagina}."$dominio"
-confPagina=${nombreCompleto}".conf"
-confSecPagina=${nombreCompleto}"-ssl.conf"
-csrPagina=${nombrePagina}".csr"
-keyPagina=${nombrePagina}".key"
-crtPagina=${nombrePagina}".crt"
+nombreCompleto="${nombrePagina}.${dominio}"
+confPagina="${nombreCompleto}.conf"
+confSecPagina="${nombreCompleto}-ssl.conf"
+csrPagina="${nombrePagina}.csr"
+keyPagina="${nombrePagina}.key"
+crtPagina="${nombrePagina}.crt"
+
 #############
 ## Solicitud de la IP sin máscara e IP inversa##
 read -p "Ahora introduce la direccion IP que tendrá la página web SIN LA MÁSCARA: " IP
 read -p "Escribe su dirección de zona inversa (Ej: 192.168.20.10/16 -> 10.20): " IPInv
-dirIPInv=${IPInv}".in-addr.arpa"
+dirIPInv="${IPInv}.in-addr.arpa"
 echo "Tu netplan tiene que tener ya configurado el adaptador con la dirección y el DNS establecido"
+
 #############
 ## Creación de la estructura del directorio ##
-mkdir -p /var/www/"$nombrePagina"
-sudo cp /var/www/html/index.html /var/www/"$nombrePagina"/index.html
+mkdir -p "/var/www/$nombrePagina"
+cp /var/www/html/index.html "/var/www/$nombrePagina/index.html"
 echo "Estructura de directorio creada"
+
 #############
 ## Crear los hosts virtuales para cada dominio ##
-cd /etc/apache2/sites-available/
+cd /etc/apache2/sites-available/ || exit 1
 cp 000-default.conf "$confPagina"
 cp default-ssl.conf "$confSecPagina"
-a2ensite "$confPagina" && recarga_apache
+a2ensite "$confPagina" && recargar apache2
 echo "Añadidos los archivos de configuración y apache reiniciado"
+
 #############
 ## Cambio de la página de configuración ##
-sed -i $"10c\\\tDirectoryIndex index.html" "$confPagina"
-sed -i $"11c\\\tServerAdmin webmaster@$nombreCompleto" "$confPagina"
-sed -i $"12c\\\tDocumentRoot /var/www/$dominio" "$confPagina"
+sed -i "10c\\\tDirectoryIndex index.html" "$confPagina"
+sed -i "11c\\\tServerAdmin webmaster@$nombreCompleto" "$confPagina"
+sed -i "12c\\\tDocumentRoot /var/www/$nombrePagina" "$confPagina"
 echo "Cambiados archivos de configuración de la página de HTTP"
+
 #############
 ## Habilitar los archivos de configuración ##
 systemctl reload apache2
+
 #############
 ## Configurando SSL ##
 echo "Configurando SSL..."
@@ -98,55 +110,63 @@ openssl req -new -key "$keyPagina" -out "$csrPagina"
 openssl x509 -req -days 365 -in "$csrPagina" -signkey "$keyPagina" -out "$crtPagina"
 cp "$keyPagina" /etc/ssl/private/
 cp "$crtPagina" /etc/ssl/certs/
+
 #############
 ## Creación de la página ya configurada ##
-sed -i $"2c\\\tServerAdmin webmaster@$nombreCompleto" "$confSecPagina"
-sed -i $"3c\\\tDirectoryIndex index.html" "$confSecPagina"
-sed -i $"4c\\\tDocumentRoot /var/www/$dominio" "$confSecPagina"
-sed -i $"31c\\\tSSLCertificateFile\\t/etc/ssl/certs/$crtPagina" "$confSecPagina"
-sed -i $"32c\\\tSSLCertificateKeyFile\\t/etc/ssl/private/$keyPagina" "$confSecPagina"
-sed -i $"94c\\\tSSLOptions +FakeBasicAuth +ExportCertData +StrictRequire" "$confSecPagina"
-#############
+sed -i "2c\\\tServerAdmin webmaster@$nombreCompleto" "$confSecPagina"
+sed -i "3c\\\tDirectoryIndex index.html" "$confSecPagina"
+sed -i "4c\\\tDocumentRoot /var/www/$nombrePagina" "$confSecPagina"
+sed -i "31c\\\tSSLCertificateFile\\t/etc/ssl/certs/$crtPagina" "$confSecPagina"
+sed -i "32c\\\tSSLCertificateKeyFile\\t/etc/ssl/private/$keyPagina" "$confSecPagina"
+sed -i "94c\\\tSSLOptions +FakeBasicAuth +ExportCertData +StrictRequire" "$confSecPagina"
+
 echo "Configuración ya añadida, reiniciando apache."
-recargar "apache2"
+recargar apache2
+
 ## Configuración de DNS ##
-cd /etc/bind/
-sed -i $"13c\\\tforwarders {" "$confFWDNS"
-sed -i $"14c\\\t\t8.8.8.8;" "$confFWDNS"
-sed -i $"15c\\\t\t1.1.1.1;" "$confFWDNS"
-sed -i $"16c\\\t\t8.8.4.4;" "$confFWDNS"
-sed -i $"17c\\\t};" "$confFWDNS"
-sed -i $"24c\\\tlisten-on { any; };" "$confFWDNS"
+cd /etc/bind/ || exit 1
+sed -i "13c\\\tforwarders {" "$confFWDNS"
+sed -i "14c\\\t\t8.8.8.8;" "$confFWDNS"
+sed -i "15c\\\t\t1.1.1.1;" "$confFWDNS"
+sed -i "16c\\\t\t8.8.4.4;" "$confFWDNS"
+sed -i "17c\\\t};" "$confFWDNS"
+sed -i "24c\\\tlisten-on { any; };" "$confFWDNS"
 sed -i '$a\	allow-query { any; };' "$confFWDNS"
 sed -i '$a\};' "$confFWDNS"
+
 #############
 ## Editar named.config.local para añadir las zonas directa e inversa ##
 echo "Forwarders del DNS Configurado, creando zonas del DNS."
 if [ -d "$zonas" ]; then
-	echo "El directorio de zones ya existe, editando named.config.local."
+	echo "El directorio de zones ya existe, editando named.conf.local."
 	creacion_dns
 else
-	echo "La carpeta de zones NO existe, creando carpeta y editando named.config.local."
-	mkdir "$zonas"
+	echo "La carpeta de zones NO existe, creando carpeta y editando named.conf.local."
+	mkdir -p "$zonas"
 	creacion_dns
 fi
+
 #############
 ## Copiar los archivos de las zonas y editarlas ##
 echo "Copiando archivos de plantilla db. ..."
-cp db.local zones/db.${nombreCompleto}.conf && cp db.127 zones/db.${dirIPInv}
+cp /etc/bind/db.local "$zonas/db.${nombreCompleto}.conf"
+cp /etc/bind/db.127   "$zonas/db.${dirIPInv}"
+
 #############
 ## Editar la zona directa y inversa ##
 echo "Editando zona directa y inversa..."
-cd /etc/bind/zones
-sed -i $"5c\\@\tIN\tSOA\t${nombreCompleto}.\troot.${nombreCompleto}.  (" "db.${nombreCompleto}"
-sed -i $"6c\\\t\t\t    100\t \t; Serial" "db.${nombreCompleto}"
-sed -i $"12c\\@\tIN\tNS\t${equipo}." "db.${nombreCompleto}"
-sed -i $"13c\\www\tIN\tCNAME\t${nombreCompleto}." "db.${nombreCompleto}"
+cd /etc/bind/zones || exit 1
+
+sed -i "5c\\@\\tIN\\tSOA\\t${nombreCompleto}.\\troot.${nombreCompleto}.  (" "db.${nombreCompleto}.conf"
+sed -i "6c\\\t\t\t    100\t \t; Serial" "db.${nombreCompleto}.conf"
+sed -i "12c\\@\\tIN\\tNS\\t${equipo}." "db.${nombreCompleto}.conf"
+sed -i "13c\\www\\tIN\\tCNAME\\t${nombreCompleto}." "db.${nombreCompleto}.conf"
 echo "¡Zona directa configurada!"
+
 echo "Configurando zona inversa..."
-##
-sed -i $"5c\\@\tIN\tSOA\t${nombreCompleto}.\troot.${nombreCompleto}.  (" "db.${dirIPInv}"
-sed -i $"6c\\\t\t\t    100\t \t; Serial" "db.${dirIPInv}"
-sed -i $"12c\\@\tIN\tNS\t${equipo}." "db.${dirIPInv}"
-sed -i $"13c\\${IPInv}\tIN\tPTR\t${equipo}.${nombreCompleto}" "db.${dirIPInv}"
-recargar "bind9"
+sed -i "5c\\@\\tIN\\tSOA\\t${nombreCompleto}.\\troot.${nombreCompleto}.  (" "db.${dirIPInv}"
+sed -i "6c\\\t\t\t    100\t \t; Serial" "db.${dirIPInv}"
+sed -i "12c\\@\\tIN\\tNS\\t${equipo}." "db.${dirIPInv}"
+sed -i "13c\\${IPInv}\\tIN\\tPTR\\t${equipo}.${nombreCompleto}" "db.${dirIPInv}"
+
+recargar bind9

@@ -170,3 +170,14 @@ sed -i "12c\\@\\tIN\\tNS\\t${equipo}." "db.${dirIPInv}"
 sed -i "13c\\${IPInv}\\tIN\\tPTR\\t${equipo}.${nombreCompleto}" "db.${dirIPInv}"
 
 recargar bind9
+##############
+## Configurar los Archivos de Apache ##
+echo "Configurando archivos de apache con la nueva sintaxis..."
+cd /etc/apache2/sites-available/
+sed -i "13c\\\tServerName ${equipo}.${nombreCompleto}" "${confPagina}"
+sed -i "14c\\\tServerAlias www.${nombreCompleto}" "${confPagina}"
+recargar apache2
+##############
+echo ""
+echo ""
+echo "Finalizado! Recuerda poner tu netplan para que use tu equipo como DNS y así se traduzcan las direcciones!"

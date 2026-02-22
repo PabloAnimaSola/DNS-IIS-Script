@@ -7,6 +7,6 @@ Para clonarlo:\
 ``cd ~/DNS-IIS-Script``\
 ``sudo ./creadorDNS-IIS.sh``\
 o\
-``sudo bash creadorDNS-IIS.sh``\
+``sudo bash ~/DNS-IIS-Script/creadorDNS-IIS.sh``\
 Si sigue sin ejecutar añade permisos de ejecución:\
 ``sudo chmod +x ~/DNS-IIS-Script/creadorDNS-IIS.sh``

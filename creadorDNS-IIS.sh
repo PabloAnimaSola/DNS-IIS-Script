@@ -53,7 +53,7 @@ clear
 echo "Bienvenido al script de creación de páginas de IIS y vinculación de DNS"
 echo "Antes de continuar, asegúrate de tener instalado apache2, bind9, y ufw (sudo apt install apache2 bind9 ufw)"
 echo "Necesitas también tener la estructura básica de las carpetas de bind y apache (zonas y el nombre de la página respectivamente)."
-echo -e "${AZUL}$Eres la máquina" "$equipo${RESET}"
+echo -e "${AZUL}Eres la máquina" "$equipo${RESET}"
 read -p "Introduce cualquier cosa para continuar..." Confirmar
 #############
 ## Solicitud de los nombres de las zonas y direcciones IP ##
@@ -70,7 +70,7 @@ crtPagina=${nombrePagina}".crt"
 #############
 ## Solicitud de la IP sin máscara e IP inversa##
 read -p "Ahora introduce la direccion IP que tendrá la página web SIN LA MÁSCARA: " IP
-read -p "Escribe su dirección de zona inversa (Ej: 192.168.20.10/16 -> 10.20): " IPInv
+read -p "Escribe su dirección de zona inversa (Ej: 192.168.20.10/16 -> 168.192): " IPInv
 dirIPInv=${IPInv}".in-addr.arpa"
 echo "Tu netplan tiene que tener ya configurado el adaptador con la dirección y el DNS establecido"
 #############
@@ -140,7 +140,7 @@ fi
 #############
 ## Copiar los archivos de las zonas y editarlas ##
 echo -e "${AZUL}Copiando archivos de plantilla db. ...${RESET}"
-cp db.local zones/db.${nombreCompleto}.conf && cp db.127 zones/db.${dirIPInv}
+cp db.local /etc/bind/zones/db.${nombreCompleto}.conf && cp db.127 /etc/bind/zones/db.${dirIPInv}
 #############
 ## Editar la zona directa y inversa ##
 echo -e "${AZUL}Editando zona directa y inversa...${RESET}"

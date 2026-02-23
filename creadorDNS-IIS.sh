@@ -83,7 +83,7 @@ echo "Estructura de directorio creada"
 cd /etc/apache2/sites-available/
 cp 000-default.conf "$confPagina"
 cp default-ssl.conf "$confSecPagina"
-a2ensite "$confPagina" && recarga_apache
+a2ensite "$confPagina" && recargar "apache2"
 echo -e "${VERDE}Añadidos los archivos de configuración y apache reiniciado${RESET}"
 #############
 ## Cambio de la página de configuración ##
@@ -124,8 +124,7 @@ sed -i $"15c\\\t\t1.1.1.1;" "$confFWDNS"
 sed -i $"16c\\\t\t8.8.4.4;" "$confFWDNS"
 sed -i $"17c\\\t};" "$confFWDNS"
 sed -i $"24c\\\tlisten-on { any; };" "$confFWDNS"
-sed -i '$a\	allow-query { any; };' "$confFWDNS"
-sed -i '$a\};' "$confFWDNS"
+sed -i $"25c\\\tallow-query { any; };" "$confFWDNS"
 #############
 ## Editar named.config.local para añadir las zonas directa e inversa ##
 echo -e "${VERDE}Forwarders del DNS Configurado, creando zonas del DNS.${RESET}"
@@ -148,7 +147,9 @@ cd /etc/bind/zones
 sed -i $"5c\\@\tIN\tSOA\t${nombreCompleto}.\troot.${nombreCompleto}.  (" "db.${nombreCompleto}.conf"
 sed -i $"6c\\\t\t\t    100\t \t; Serial" "db.${nombreCompleto}.conf"
 sed -i $"12c\\@\tIN\tNS\t${equipo}." "db.${nombreCompleto}.conf"
-sed -i $"13c\\www\tIN\tCNAME\t${nombreCompleto}." "db.${nombreCompleto}.conf"
+sed -i $"13c\\@\tIN\tA\t${IP}" "db.${nombreCompleto}.conf"
+sed -i $"14c\\${equipo}\tIN\tA\t${IP}" "db.${nombreCompleto}.conf"
+sed -i $"15c\\www\tIN\tCNAME\t${nombreCompleto}." "db.${nombreCompleto}.conf"
 echo -e "${VERDE}¡Zona directa configurada!${RESET}"
 echo -e "${AZUL}Configurando zona inversa...${RESET}"
 ##
@@ -158,7 +159,7 @@ sed -i $"12c\\@\tIN\tNS\t${equipo}." "db.${dirIPInv}"
 echo -e "${ROJO}Es necesario especificar la dirección INVERSA de host:${RESET}"
 echo -e "${AZUL} Ejemplo: 192.168.80.90/16 ->${RESET} ${VERDE}90.80${RESET}"
 read "dirInvHost"
-sed -i $"13c\\${IPInv}\tIN\tPTR\t${dirInvHost}.${nombreCompleto}" "db.${dirIPInv}"
+sed -i $"13c\\${dirInvHost}\tIN\tPTR\t${nombreCompleto}." "db.${dirIPInv}"
 recargar "bind9"
 echo -e "${VERDE}¡Zona inversa configurada y bind9 recargado!${RESET}"
 echo -e "${VERDE}¡Proceso finalizado!${RESET}"

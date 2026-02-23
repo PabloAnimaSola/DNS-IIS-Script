@@ -147,8 +147,7 @@ sed -i $"5c\\@\tIN\tSOA\t${nombreCompleto}.\troot.${nombreCompleto}.  (" "db.${n
 sed -i $"6c\\\t\t\t    100\t \t; Serial" "db.${nombreCompleto}.conf"
 sed -i $"12c\\@\tIN\tNS\t${equipo}." "db.${nombreCompleto}.conf"
 sed -i $"13c\\@\tIN\tA\t${IP}" "db.${nombreCompleto}.conf"
-sed -i $"14c\\${equipo}\tIN\tA\t${IP}" "db.${nombreCompleto}.conf"
-sed -i $"15c\\www\tIN\tCNAME\t${nombreCompleto}." "db.${nombreCompleto}.conf"
+sed -i $"14c\\www\tIN\tCNAME\t${nombreCompleto}." "db.${nombreCompleto}.conf"
 echo -e "${VERDE}¡Zona directa configurada!${RESET}"
 echo -e "${AZUL}Configurando zona inversa...${RESET}"
 ##

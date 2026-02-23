@@ -145,10 +145,10 @@ cp db.local /etc/bind/zones/db.${nombreCompleto}.conf && cp db.127 /etc/bind/zon
 ## Editar la zona directa y inversa ##
 echo -e "${AZUL}Editando zona directa y inversa...${RESET}"
 cd /etc/bind/zones
-sed -i $"5c\\@\tIN\tSOA\t${nombreCompleto}.\troot.${nombreCompleto}.  (" "db.${nombreCompleto}"
-sed -i $"6c\\\t\t\t    100\t \t; Serial" "db.${nombreCompleto}"
-sed -i $"12c\\@\tIN\tNS\t${equipo}." "db.${nombreCompleto}"
-sed -i $"13c\\www\tIN\tCNAME\t${nombreCompleto}." "db.${nombreCompleto}"
+sed -i $"5c\\@\tIN\tSOA\t${nombreCompleto}.\troot.${nombreCompleto}.  (" "db.${nombreCompleto}.conf"
+sed -i $"6c\\\t\t\t    100\t \t; Serial" "db.${nombreCompleto}.conf"
+sed -i $"12c\\@\tIN\tNS\t${equipo}." "db.${nombreCompleto}.conf"
+sed -i $"13c\\www\tIN\tCNAME\t${nombreCompleto}." "db.${nombreCompleto}.conf"
 echo -e "${VERDE}¡Zona directa configurada!${RESET}"
 echo -e "${AZUL}Configurando zona inversa...${RESET}"
 ##

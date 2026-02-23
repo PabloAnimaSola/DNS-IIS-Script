@@ -123,7 +123,7 @@ sed -i $"14c\\\t\t8.8.8.8;" "$confFWDNS"
 sed -i $"15c\\\t\t1.1.1.1;" "$confFWDNS"
 sed -i $"16c\\\t\t8.8.4.4;" "$confFWDNS"
 sed -i $"17c\\\t};" "$confFWDNS"
-sed -i $"24c\\\tlisten-on { any; };\n\tallow-query { any; };" "$confFWDNS"
+sed -i '/^};/i\\tlisten-on { any; };\n\tallow-query { any; };' "$confFWDNS"
 #############
 ## Editar named.config.local para añadir las zonas directa e inversa ##
 echo -e "${VERDE}Forwarders del DNS Configurado, creando zonas del DNS.${RESET}"

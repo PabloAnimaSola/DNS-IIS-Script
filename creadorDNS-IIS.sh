@@ -11,6 +11,7 @@ if [[ $EUID -ne 0 ]]; then
   sudo bash ~/DNS-IIS-Script/creadorDNS-IIS.sh
   exit 1
 fi
+
 ## Declaración de Variables ##
 equipo=$(hostname)
 IP=""
@@ -25,6 +26,7 @@ crtPagina=""
 confFWDNS="named.conf.options"
 confZonasDNS="named.conf.local"
 zonas="/etc/bind/zones"
+
 ##############
 ## Funciones ##
 creacion_dns(){
@@ -44,9 +46,11 @@ EOF
 
 echo -e "${VERDE}¡Zonas creadas!${RESET}"
 }
+
 recargar(){
-	systemctl restart $1
+	systemctl restart "$1"
 }
+
 ##############
 ## Introducción ##
 clear
@@ -55,32 +59,37 @@ echo "Antes de continuar, asegúrate de tener instalado apache2, bind9, y ufw (s
 echo "Necesitas también tener la estructura básica de las carpetas de bind y apache (zonas y el nombre de la página respectivamente)."
 echo -e "${AZUL}Eres la máquina" "$equipo${RESET}"
 read -p "Introduce cualquier cosa para continuar..." Confirmar
+
 #############
 ## Solicitud de los nombres de las zonas y direcciones IP ##
 read -p "Introduce el nombre de la página web sin el dominio (Ej: realzaragoza): " nombrePagina
 read -p "Ahora introduce el tipo de dominio (Ej: org, edu, com, es): " dominio
+
 #############
 ## Creación de las variables de páginas del dominio ##
-nombreCompleto=${nombrePagina}."$dominio"
-confPagina=${nombreCompleto}".conf"
-confSecPagina=${nombreCompleto}"-ssl.conf"
-csrPagina=${nombrePagina}".csr"
-keyPagina=${nombrePagina}".key"
-crtPagina=${nombrePagina}".crt"
+nombreCompleto="${nombrePagina}.${dominio}"
+confPagina="${nombreCompleto}.conf"
+confSecPagina="${nombreCompleto}-ssl.conf"
+csrPagina="${nombrePagina}.csr"
+keyPagina="${nombrePagina}.key"
+crtPagina="${nombrePagina}.crt"
+
 #############
 ## Solicitud de la IP sin máscara e IP inversa##
 read -p "Ahora introduce la direccion IP que tendrá la página web SIN LA MÁSCARA: " IP
 read -p "Escribe su dirección de zona inversa (Ej: 192.168.20.10/16 -> 168.192): " IPInv
 dirIPInv=${IPInv}".in-addr.arpa"
 echo "Tu netplan tiene que tener ya configurado el adaptador con la dirección y el DNS establecido"
+
 #############
 ## Creación de la estructura del directorio ##
-mkdir -p /var/www/"$nombrePagina"
-sudo cp /var/www/html/index.html /var/www/"$nombrePagina"/index.html
+mkdir -p "/var/www/$nombrePagina"
+cp /var/www/html/index.html "/var/www/$nombrePagina/index.html"
 echo "Estructura de directorio creada"
+
 #############
 ## Crear los hosts virtuales para cada dominio ##
-cd /etc/apache2/sites-available/
+cd /etc/apache2/sites-available/ || exit 1
 cp 000-default.conf "$confPagina"
 cp default-ssl.conf "$confSecPagina"
 a2ensite "$confPagina" && recargar "apache2"
@@ -94,6 +103,7 @@ echo -e "${VERDE}Cambiados archivos de configuración de la página de HTTP${RES
 #############
 ## Habilitar los archivos de configuración ##
 systemctl reload apache2
+
 #############
 ## Configurando SSL ##
 echo "Configurando SSL..."
@@ -105,6 +115,7 @@ openssl req -new -key "$keyPagina" -out "$csrPagina"
 openssl x509 -req -days 365 -in "$csrPagina" -signkey "$keyPagina" -out "$crtPagina"
 cp "$keyPagina" /etc/ssl/private/
 cp "$crtPagina" /etc/ssl/certs/
+
 #############
 ## Creación de la página ya configurada ##
 sed -i $"2c\\\tServerAdmin webmaster@$nombreCompleto" "$confSecPagina"
@@ -128,13 +139,14 @@ sed -i '/^};/i\\tlisten-on { any; };\n\tallow-query { any; };' "$confFWDNS"
 ## Editar named.config.local para añadir las zonas directa e inversa ##
 echo -e "${VERDE}Forwarders del DNS Configurado, creando zonas del DNS.${RESET}"
 if [ -d "$zonas" ]; then
-	echo "El directorio de zones ya existe, editando named.config.local."
+	echo "El directorio de zones ya existe, editando named.conf.local."
 	creacion_dns
 else
-	echo "La carpeta de zones NO existe, creando carpeta y editando named.config.local."
-	mkdir "$zonas"
+	echo "La carpeta de zones NO existe, creando carpeta y editando named.conf.local."
+	mkdir -p "$zonas"
 	creacion_dns
 fi
+
 #############
 ## Copiar los archivos de las zonas y editarlas ##
 echo -e "${AZUL}Copiando archivos de plantilla db. ...${RESET}"

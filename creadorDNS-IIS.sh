@@ -42,7 +42,7 @@ zone "${IPInv}.in-addr.arpa" {
 
 EOF
 
-echo "¡Zonas creadas!"
+echo -e "${VERDE}¡Zonas creadas!${RESET}"
 }
 recargar(){
 	systemctl restart $1
@@ -53,7 +53,7 @@ clear
 echo "Bienvenido al script de creación de páginas de IIS y vinculación de DNS"
 echo "Antes de continuar, asegúrate de tener instalado apache2, bind9, y ufw (sudo apt install apache2 bind9 ufw)"
 echo "Necesitas también tener la estructura básica de las carpetas de bind y apache (zonas y el nombre de la página respectivamente)."
-echo -e "Eres la máquina" "$equipo"
+echo -e "${AZUL}$Eres la máquina" "$equipo${RESET}"
 read -p "Introduce cualquier cosa para continuar..." Confirmar
 #############
 ## Solicitud de los nombres de las zonas y direcciones IP ##
@@ -84,13 +84,13 @@ cd /etc/apache2/sites-available/
 cp 000-default.conf "$confPagina"
 cp default-ssl.conf "$confSecPagina"
 a2ensite "$confPagina" && recarga_apache
-echo "Añadidos los archivos de configuración y apache reiniciado"
+echo -e "${VERDE}Añadidos los archivos de configuración y apache reiniciado${RESET}"
 #############
 ## Cambio de la página de configuración ##
 sed -i $"10c\\\tDirectoryIndex index.html" "$confPagina"
 sed -i $"11c\\\tServerAdmin webmaster@$nombreCompleto" "$confPagina"
-sed -i $"12c\\\tDocumentRoot /var/www/$dominio" "$confPagina"
-echo "Cambiados archivos de configuración de la página de HTTP"
+sed -i $"12c\\\tDocumentRoot /var/www/$nombrePagina" "$confPagina"
+echo -e "${VERDE}Cambiados archivos de configuración de la página de HTTP${RESET}"
 #############
 ## Habilitar los archivos de configuración ##
 systemctl reload apache2
@@ -109,12 +109,12 @@ cp "$crtPagina" /etc/ssl/certs/
 ## Creación de la página ya configurada ##
 sed -i $"2c\\\tServerAdmin webmaster@$nombreCompleto" "$confSecPagina"
 sed -i $"3c\\\tDirectoryIndex index.html" "$confSecPagina"
-sed -i $"4c\\\tDocumentRoot /var/www/$dominio" "$confSecPagina"
+sed -i $"4c\\\tDocumentRoot /var/www/$nombrePagina" "$confSecPagina"
 sed -i $"31c\\\tSSLCertificateFile\\t/etc/ssl/certs/$crtPagina" "$confSecPagina"
 sed -i $"32c\\\tSSLCertificateKeyFile\\t/etc/ssl/private/$keyPagina" "$confSecPagina"
 sed -i $"94c\\\tSSLOptions +FakeBasicAuth +ExportCertData +StrictRequire" "$confSecPagina"
 #############
-echo "Configuración ya añadida, reiniciando apache."
+echo -e "${VERDE}Configuración ya añadida, reiniciando apache.${RESET}"
 recargar "apache2"
 ## Configuración de DNS ##
 cd /etc/bind/
@@ -128,7 +128,7 @@ sed -i '$a\	allow-query { any; };' "$confFWDNS"
 sed -i '$a\};' "$confFWDNS"
 #############
 ## Editar named.config.local para añadir las zonas directa e inversa ##
-echo "Forwarders del DNS Configurado, creando zonas del DNS."
+echo -e "${VERDE}Forwarders del DNS Configurado, creando zonas del DNS.${RESET}"
 if [ -d "$zonas" ]; then
 	echo "El directorio de zones ya existe, editando named.config.local."
 	creacion_dns
@@ -139,21 +139,23 @@ else
 fi
 #############
 ## Copiar los archivos de las zonas y editarlas ##
-echo "Copiando archivos de plantilla db. ..."
+echo -e "${AZUL}Copiando archivos de plantilla db. ...${RESET}"
 cp db.local zones/db.${nombreCompleto}.conf && cp db.127 zones/db.${dirIPInv}
 #############
 ## Editar la zona directa y inversa ##
-echo "Editando zona directa y inversa..."
+echo -e "${AZUL}Editando zona directa y inversa...${RESET}"
 cd /etc/bind/zones
 sed -i $"5c\\@\tIN\tSOA\t${nombreCompleto}.\troot.${nombreCompleto}.  (" "db.${nombreCompleto}"
 sed -i $"6c\\\t\t\t    100\t \t; Serial" "db.${nombreCompleto}"
 sed -i $"12c\\@\tIN\tNS\t${equipo}." "db.${nombreCompleto}"
 sed -i $"13c\\www\tIN\tCNAME\t${nombreCompleto}." "db.${nombreCompleto}"
-echo "¡Zona directa configurada!"
-echo "Configurando zona inversa..."
+echo -e "${VERDE}¡Zona directa configurada!${RESET}"
+echo -e "${AZUL}Configurando zona inversa...${RESET}"
 ##
 sed -i $"5c\\@\tIN\tSOA\t${nombreCompleto}.\troot.${nombreCompleto}.  (" "db.${dirIPInv}"
 sed -i $"6c\\\t\t\t    100\t \t; Serial" "db.${dirIPInv}"
 sed -i $"12c\\@\tIN\tNS\t${equipo}." "db.${dirIPInv}"
 sed -i $"13c\\${IPInv}\tIN\tPTR\t${equipo}.${nombreCompleto}" "db.${dirIPInv}"
 recargar "bind9"
+echo -e "${VERDE}¡Zona inversa configurada y bind9 recargado!${RESET}"
+echo -e "${VERDE}¡Proceso finalizado!${RESET}"

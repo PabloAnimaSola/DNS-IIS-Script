@@ -1,7 +1,14 @@
 #!/bin/bash
+## Declaración de colores ##
+RESET='\033[0m' #Reinicia el color
+ROJO='\033[1;31m'
+AZUL='\033[1;36m'
+VERDE='\033[0;32m'
+###############
 ## Requisito de sudo ##
 if [[ $EUID -ne 0 ]]; then
-  echo "Tienes que correr el script con root. Usa sudo. (sudo ./creadorDNS-IIS.sh)" >&2
+  echo -e "${ROJO}Tienes que correr el script con root, elevando permisos...${RESET}"
+  sudo bash ~/DNS-IIS-Script/creadorDNS-IIS.sh
   exit 1
 fi
 ## Declaración de Variables ##
@@ -46,7 +53,7 @@ clear
 echo "Bienvenido al script de creación de páginas de IIS y vinculación de DNS"
 echo "Antes de continuar, asegúrate de tener instalado apache2, bind9, y ufw (sudo apt install apache2 bind9 ufw)"
 echo "Necesitas también tener la estructura básica de las carpetas de bind y apache (zonas y el nombre de la página respectivamente)."
-echo "Eres la máquina" "$equipo"
+echo -e "Eres la máquina" "$equipo"
 read -p "Introduce cualquier cosa para continuar..." Confirmar
 #############
 ## Solicitud de los nombres de las zonas y direcciones IP ##

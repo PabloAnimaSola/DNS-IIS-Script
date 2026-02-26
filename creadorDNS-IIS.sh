@@ -34,7 +34,7 @@ cat >> "$confZonasDNS" <<EOF
 
 zone "$nombreCompleto" {
 	type master;
-	file "/etc/bind/zones/db.${nombreCompleto}.conf";
+	file "/etc/bind/zones/db.${nombrePagina}.conf";
 };
 
 zone "${IPInv}.in-addr.arpa" {
@@ -134,7 +134,7 @@ sed -i $"14c\\\t\t8.8.8.8;" "$confFWDNS"
 sed -i $"15c\\\t\t1.1.1.1;" "$confFWDNS"
 sed -i $"16c\\\t\t8.8.4.4;" "$confFWDNS"
 sed -i $"17c\\\t};" "$confFWDNS"
-sed -i '/^};/i\\tlisten-on { any; };\n\tallow-query { any; };\n};' "$confFWDNS"
+sed -i '/^};/i\\tlisten-on { any; };\n\tallow-query { any; };\n' "$confFWDNS"
 #############
 ## Editar named.config.local para añadir las zonas directa e inversa ##
 echo -e "${VERDE}Forwarders del DNS Configurado, creando zonas del DNS.${RESET}"
@@ -150,7 +150,7 @@ fi
 #############
 ## Copiar los archivos de las zonas y editarlas ##
 echo -e "${AZUL}Copiando archivos de plantilla db. ...${RESET}"
-cp db.local /etc/bind/zones/db.${nombreCompleto}.conf && cp db.127 /etc/bind/zones/db.${dirIPInv}
+cp db.local /etc/bind/zones/db.${nombrePagina}.conf && cp db.127 /etc/bind/zones/db.${dirIPInv}
 #############
 ## Editar la zona directa y inversa ##
 echo -e "${AZUL}Editando zona directa y inversa...${RESET}"
@@ -169,7 +169,7 @@ sed -i $"12c\\@\tIN\tNS\t${equipo}." "db.${dirIPInv}"
 echo -e "${ROJO}Es necesario especificar la dirección INVERSA de host:${RESET}"
 echo -e "${AZUL} Ejemplo: 192.168.80.90/16 ->${RESET} ${VERDE}90.80${RESET}"
 read "dirInvHost"
-sed -i $"13c\\${dirInvHost}\tIN\tPTR\t${nombreCompleto}." "db.${dirIPInv}"
+sed -i $"13c\\${dirInvHost}\tIN\tPTR\t${equipo}.${nombreCompleto}." "db.${dirIPInv}"
 recargar "bind9"
 echo -e "${VERDE}¡Zona inversa configurada y bind9 recargado!${RESET}"
 echo -e "${VERDE}¡Proceso finalizado!${RESET}"

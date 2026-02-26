@@ -123,8 +123,8 @@ cp "$crtPagina" /etc/ssl/certs/
 sed -i $"2c\\\tServerAdmin webmaster@$nombreCompleto" "$confSecPagina"
 sed -i $"3c\\\tDirectoryIndex index.html" "$confSecPagina"
 sed -i $"4c\\\tDocumentRoot /var/www/$nombrePagina" "$confSecPagina"
-sed -i $"5c\\\tServerName $equipo.$nombrePagina" "$confSecPagina"
-sed -i $"6c\\\tServerAlias www.$nombrePagina" "$confSecPagina"
+sed -i $"5c\\\tServerName $equipo.$nombreCompleto" "$confSecPagina"
+sed -i $"6c\\\tServerAlias www.$nombreCompleto" "$confSecPagina"
 sed -i $"31c\\\tSSLCertificateFile\\t/etc/ssl/certs/$crtPagina" "$confSecPagina"
 sed -i $"32c\\\tSSLCertificateKeyFile\\t/etc/ssl/private/$keyPagina" "$confSecPagina"
 sed -i $"94c\\\tSSLOptions +FakeBasicAuth +ExportCertData +StrictRequire" "$confSecPagina"
@@ -154,16 +154,16 @@ fi
 #############
 ## Copiar los archivos de las zonas y editarlas ##
 echo -e "${AZUL}Copiando archivos de plantilla db. ...${RESET}"
-cp db.local /etc/bind/zones/db.${nombreCompleto}.conf && cp db.127 /etc/bind/zones/db.${dirIPInv}
+cp db.local /etc/bind/zones/db.${nombrePagina}.conf && cp db.127 /etc/bind/zones/db.${dirIPInv}
 #############
 ## Editar la zona directa y inversa ##
 echo -e "${AZUL}Editando zona directa y inversa...${RESET}"
 cd /etc/bind/zones
-sed -i $"5c\\@\tIN\tSOA\t${nombreCompleto}.\troot.${nombreCompleto}.  (" "db.${nombreCompleto}.conf"
-sed -i $"6c\\\t\t\t    100\t \t; Serial" "db.${nombreCompleto}.conf"
-sed -i $"12c\\@\tIN\tNS\t${equipo}." "db.${nombreCompleto}.conf"
-sed -i $"13c\\@\tIN\tA\t${IP}" "db.${nombreCompleto}.conf"
-sed -i $"14c\\www\tIN\tCNAME\t${nombreCompleto}." "db.${nombreCompleto}.conf"
+sed -i $"5c\\@\tIN\tSOA\t${nombreCompleto}.\troot.${nombreCompleto}.  (" "db.${nombrePagina}.conf"
+sed -i $"6c\\\t\t\t    100\t \t; Serial" "db.${nombrePagina}.conf"
+sed -i $"12c\\@\tIN\tNS\t${equipo}." "db.${nombrePagina}.conf"
+sed -i $"13c\\@\tIN\tA\t${IP}" "db.${nombrePagina}.conf"
+sed -i $"14c\\www\tIN\tCNAME\t${nombreCompleto}." "db.${nombrePagina}.conf"
 echo -e "${VERDE}¡Zona directa configurada!${RESET}"
 echo -e "${AZUL}Configurando zona inversa...${RESET}"
 ##

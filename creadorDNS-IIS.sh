@@ -100,6 +100,8 @@ echo -e "${VERDE}Añadidos los archivos de configuración y apache reiniciado${R
 sed -i $"10c\\\tDirectoryIndex index.html" "$confPagina"
 sed -i $"11c\\\tServerAdmin webmaster@$nombreCompleto" "$confPagina"
 sed -i $"12c\\\tDocumentRoot /var/www/$nombrePagina" "$confPagina"
+sed -i $"13c\\\tServerName $equipo.$nombrePagina" "$confPagina"
+sed -i $"14c\\\tServerAlias www.$nombrePagina" "$confPagina"
 echo -e "${VERDE}Cambiados archivos de configuración de la página de HTTP${RESET}"
 #############
 ## Habilitar los archivos de configuración ##
@@ -122,6 +124,8 @@ cp "$crtPagina" /etc/ssl/certs/
 sed -i $"2c\\\tServerAdmin webmaster@$nombreCompleto" "$confSecPagina"
 sed -i $"3c\\\tDirectoryIndex index.html" "$confSecPagina"
 sed -i $"4c\\\tDocumentRoot /var/www/$nombrePagina" "$confSecPagina"
+sed -i $"5c\\\tServerName $equipo.$nombrePagina" "$confSecPagina"
+sed -i $"6c\\\tServerAlias www.$nombrePagina" "$confSecPagina"
 sed -i $"31c\\\tSSLCertificateFile\\t/etc/ssl/certs/$crtPagina" "$confSecPagina"
 sed -i $"32c\\\tSSLCertificateKeyFile\\t/etc/ssl/private/$keyPagina" "$confSecPagina"
 sed -i $"94c\\\tSSLOptions +FakeBasicAuth +ExportCertData +StrictRequire" "$confSecPagina"

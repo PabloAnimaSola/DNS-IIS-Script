@@ -1,4 +1,5 @@
 #!/bin/bash
+
 ## Declaración de colores ##
 RESET='\033[0m' #Reinicia el color
 ROJO='\033[1;31m'

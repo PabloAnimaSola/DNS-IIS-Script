@@ -160,7 +160,7 @@ cp db.local /etc/bind/zones/db.${nombrePagina}.conf && cp db.127 /etc/bind/zones
 echo -e "${AZUL}Editando zona directa y inversa...${RESET}"
 cd /etc/bind/zones
 sed -i $"5c\\@\tIN\tSOA\t${nombreCompleto}.\troot.${nombreCompleto}.  (" "db.${nombrePagina}.conf"
-sed -i $"6c\\\t\t\t    100\t \t; Serial" "db.${nombrePagina}.conf"
+sed -i $"6c\\\t\t\t    100\t\t; Serial" "db.${nombrePagina}.conf"
 sed -i $"12c\\@\tIN\tNS\t${equipo}." "db.${nombrePagina}.conf"
 sed -i $"13c\\@\tIN\tA\t${IP}" "db.${nombrePagina}.conf"
 sed -i $"14c\\www\tIN\tCNAME\t${nombreCompleto}." "db.${nombrePagina}.conf"
@@ -168,7 +168,7 @@ echo -e "${VERDE}¡Zona directa configurada!${RESET}"
 echo -e "${AZUL}Configurando zona inversa...${RESET}"
 ##
 sed -i $"5c\\@\tIN\tSOA\t${nombreCompleto}.\troot.${nombreCompleto}.  (" "db.${dirIPInv}"
-sed -i $"6c\\\t\t\t    100\t \t; Serial" "db.${dirIPInv}"
+sed -i $"6c\\\t\t\t    100\t\t; Serial" "db.${dirIPInv}"
 sed -i $"12c\\@\tIN\tNS\t${equipo}." "db.${dirIPInv}"
 echo -e "${ROJO}Es necesario especificar la dirección INVERSA de host:${RESET}"
 echo -e "${AZUL} Ejemplo: 192.168.80.90/16 ->${RESET} ${VERDE}90.80${RESET}"

@@ -100,8 +100,8 @@ echo -e "${VERDE}Añadidos los archivos de configuración y apache reiniciado${R
 sed -i $"10c\\\tDirectoryIndex index.html" "$confPagina"
 sed -i $"11c\\\tServerAdmin webmaster@$nombreCompleto" "$confPagina"
 sed -i $"12c\\\tDocumentRoot /var/www/$nombrePagina" "$confPagina"
-sed -i $"13c\\\tServerName $equipo.$nombrePagina" "$confPagina"
-sed -i $"14c\\\tServerAlias www.$nombrePagina" "$confPagina"
+sed -i $"13c\\\tServerName $equipo.$nombreCompleto" "$confPagina"
+sed -i $"14c\\\tServerAlias www.$nombreCompleto" "$confPagina"
 echo -e "${VERDE}Cambiados archivos de configuración de la página de HTTP${RESET}"
 #############
 ## Habilitar los archivos de configuración ##
@@ -155,7 +155,7 @@ fi
 #############
 ## Copiar los archivos de las zonas y editarlas ##
 echo -e "${AZUL}Copiando archivos de plantilla db. ...${RESET}"
-cp db.local /etc/bind/zones/db.${nombrePagina}.conf && cp db.127 /etc/bind/zones/db.${dirIPInv}
+cp db.local /etc/bind/zones/db.${nombreCompleto}.conf && cp db.127 /etc/bind/zones/db.${dirIPInv}
 #############
 ## Editar la zona directa y inversa ##
 echo -e "${AZUL}Editando zona directa y inversa...${RESET}"

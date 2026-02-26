@@ -168,6 +168,7 @@ echo -e "www\tIN\tCNAME\t${nombreCompleto}." >> "db.${nombrePagina}.conf"
 echo -e "${VERDE}¡Zona directa configurada!${RESET}"
 echo -e "${AZUL}Configurando zona inversa...${RESET}"
 ##
+
 sed -i $"5c\\@\tIN\tSOA\t${equipo}.${nombreCompleto}.\troot.${nombreCompleto}.  (" "db.${dirIPInv}"
 sed -i $"6c\\\t\t\t    100\t\t; Serial" "db.${dirIPInv}"
 sed -i $"12c\\@\tIN\tNS\t${equipo}.${nombreCompleto}." "db.${dirIPInv}"

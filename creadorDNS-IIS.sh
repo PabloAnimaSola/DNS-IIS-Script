@@ -34,7 +34,7 @@ cat >> "$confZonasDNS" <<EOF
 
 zone "$nombreCompleto" {
 	type master;
-	file "/etc/bind/zones/db.${nombreCompleto}.conf";
+	file "/etc/bind/zones/db.${nombrePagina}.conf";
 };
 
 zone "${IPInv}.in-addr.arpa" {
@@ -99,6 +99,8 @@ echo -e "${VERDE}Añadidos los archivos de configuración y apache reiniciado${R
 sed -i $"10c\\\tDirectoryIndex index.html" "$confPagina"
 sed -i $"11c\\\tServerAdmin webmaster@$nombreCompleto" "$confPagina"
 sed -i $"12c\\\tDocumentRoot /var/www/$nombrePagina" "$confPagina"
+sed -i $"13c\\\tServerName $equipo.$nombreCompleto" "$confPagina"
+sed -i $"14c\\\tServerAlias www.$nombreCompleto" "$confPagina"
 echo -e "${VERDE}Cambiados archivos de configuración de la página de HTTP${RESET}"
 #############
 ## Habilitar los archivos de configuración ##
@@ -121,6 +123,8 @@ cp "$crtPagina" /etc/ssl/certs/
 sed -i $"2c\\\tServerAdmin webmaster@$nombreCompleto" "$confSecPagina"
 sed -i $"3c\\\tDirectoryIndex index.html" "$confSecPagina"
 sed -i $"4c\\\tDocumentRoot /var/www/$nombrePagina" "$confSecPagina"
+sed -i $"5c\\\tServerName $equipo.$nombreCompleto" "$confSecPagina"
+sed -i $"6c\\\tServerAlias www.$nombreCompleto" "$confSecPagina"
 sed -i $"31c\\\tSSLCertificateFile\\t/etc/ssl/certs/$crtPagina" "$confSecPagina"
 sed -i $"32c\\\tSSLCertificateKeyFile\\t/etc/ssl/private/$keyPagina" "$confSecPagina"
 sed -i $"94c\\\tSSLOptions +FakeBasicAuth +ExportCertData +StrictRequire" "$confSecPagina"
@@ -134,7 +138,7 @@ sed -i $"14c\\\t\t8.8.8.8;" "$confFWDNS"
 sed -i $"15c\\\t\t1.1.1.1;" "$confFWDNS"
 sed -i $"16c\\\t\t8.8.4.4;" "$confFWDNS"
 sed -i $"17c\\\t};" "$confFWDNS"
-sed -i '/^};/i\\tlisten-on { any; };\n\tallow-query { any; };' "$confFWDNS"
+sed -i '/^};/i\\tlisten-on { any; };\n\tallow-query { any; };\n' "$confFWDNS"
 #############
 ## Editar named.config.local para añadir las zonas directa e inversa ##
 echo -e "${VERDE}Forwarders del DNS Configurado, creando zonas del DNS.${RESET}"
@@ -150,22 +154,24 @@ fi
 #############
 ## Copiar los archivos de las zonas y editarlas ##
 echo -e "${AZUL}Copiando archivos de plantilla db. ...${RESET}"
-cp db.local /etc/bind/zones/db.${nombreCompleto}.conf && cp db.127 /etc/bind/zones/db.${dirIPInv}
+cp db.local /etc/bind/zones/db.${nombrePagina}.conf && cp db.127 /etc/bind/zones/db.${dirIPInv}
 #############
 ## Editar la zona directa y inversa ##
 echo -e "${AZUL}Editando zona directa y inversa...${RESET}"
 cd /etc/bind/zones
-sed -i $"5c\\@\tIN\tSOA\t${nombreCompleto}.\troot.${nombreCompleto}.  (" "db.${nombreCompleto}.conf"
-sed -i $"6c\\\t\t\t    100\t \t; Serial" "db.${nombreCompleto}.conf"
-sed -i $"12c\\@\tIN\tNS\t${equipo}." "db.${nombreCompleto}.conf"
-sed -i $"13c\\@\tIN\tA\t${IP}" "db.${nombreCompleto}.conf"
-sed -i $"14c\\www\tIN\tCNAME\t${nombreCompleto}." "db.${nombreCompleto}.conf"
+sed -i $"5c\\@\tIN\tSOA\t${equipo}.${nombreCompleto}.\troot.${nombreCompleto}.  (" "db.${nombrePagina}.conf"
+sed -i $"6c\\\t\t\t    100\t\t; Serial" "db.${nombrePagina}.conf"
+sed -i $"12c\\@\tIN\tNS\t${equipo}.${nombreCompleto}." "db.${nombrePagina}.conf"
+sed -i $"13c\\@\tIN\tA\t${IP}" "db.${nombrePagina}.conf"
+sed -i $"14c\\${equipo}\tIN\tA\t${IP}" "db.${nombrePagina}.conf"
+echo -e "www\tIN\tCNAME\t${nombreCompleto}." >> "db.${nombrePagina}.conf"
 echo -e "${VERDE}¡Zona directa configurada!${RESET}"
 echo -e "${AZUL}Configurando zona inversa...${RESET}"
 ##
-sed -i $"5c\\@\tIN\tSOA\t${nombreCompleto}.\troot.${nombreCompleto}.  (" "db.${dirIPInv}"
-sed -i $"6c\\\t\t\t    100\t \t; Serial" "db.${dirIPInv}"
-sed -i $"12c\\@\tIN\tNS\t${equipo}." "db.${dirIPInv}"
+
+sed -i $"5c\\@\tIN\tSOA\t${equipo}.${nombreCompleto}.\troot.${nombreCompleto}.  (" "db.${dirIPInv}"
+sed -i $"6c\\\t\t\t    100\t\t; Serial" "db.${dirIPInv}"
+sed -i $"12c\\@\tIN\tNS\t${equipo}.${nombreCompleto}." "db.${dirIPInv}"
 echo -e "${ROJO}Es necesario especificar la dirección INVERSA de host:${RESET}"
 echo -e "${AZUL} Ejemplo: 192.168.80.90/16 ->${RESET} ${VERDE}90.80${RESET}"
 read "dirInvHost"

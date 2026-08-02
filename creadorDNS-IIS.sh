@@ -4,6 +4,7 @@ RESET='\033[0m' #Reinicia el color
 ROJO='\033[1;31m'
 AZUL='\033[1;36m'
 VERDE='\033[0;32m'
+
 ###############
 ## Requisito de sudo ##
 if [[ $EUID -ne 0 ]]; then
@@ -12,6 +13,7 @@ if [[ $EUID -ne 0 ]]; then
   exit 1
 fi
 
+###############
 ## Declaración de Variables ##
 equipo=$(hostname)
 IP=""
@@ -94,6 +96,7 @@ cp 000-default.conf "$confPagina"
 cp default-ssl.conf "$confSecPagina"
 a2ensite "$confPagina" && recargar "apache2"
 echo -e "${VERDE}Añadidos los archivos de configuración y apache reiniciado${RESET}"
+
 #############
 ## Cambio de la página de configuración ##
 sed -i $"10c\\\tDirectoryIndex index.html" "$confPagina"
@@ -102,6 +105,7 @@ sed -i $"12c\\\tDocumentRoot /var/www/$nombrePagina" "$confPagina"
 sed -i $"13c\\\tServerName $equipo.$nombreCompleto" "$confPagina"
 sed -i $"14c\\\tServerAlias www.$nombreCompleto" "$confPagina"
 echo -e "${VERDE}Cambiados archivos de configuración de la página de HTTP${RESET}"
+
 #############
 ## Habilitar los archivos de configuración ##
 systemctl reload apache2
@@ -128,9 +132,13 @@ sed -i $"6c\\\tServerAlias www.$nombreCompleto" "$confSecPagina"
 sed -i $"31c\\\tSSLCertificateFile\\t/etc/ssl/certs/$crtPagina" "$confSecPagina"
 sed -i $"32c\\\tSSLCertificateKeyFile\\t/etc/ssl/private/$keyPagina" "$confSecPagina"
 sed -i $"94c\\\tSSLOptions +FakeBasicAuth +ExportCertData +StrictRequire" "$confSecPagina"
+
 #############
+## Confirma configuración y recarga apache
 echo -e "${VERDE}Configuración ya añadida, reiniciando apache.${RESET}"
 recargar "apache2"
+
+#############
 ## Configuración de DNS ##
 cd /etc/bind/
 sed -i $"13c\\\tforwarders {" "$confFWDNS"
@@ -139,6 +147,7 @@ sed -i $"15c\\\t\t1.1.1.1;" "$confFWDNS"
 sed -i $"16c\\\t\t8.8.4.4;" "$confFWDNS"
 sed -i $"17c\\\t};" "$confFWDNS"
 sed -i '/^};/i\\tlisten-on { any; };\n\tallow-query { any; };\n' "$confFWDNS"
+
 #############
 ## Editar named.config.local para añadir las zonas directa e inversa ##
 echo -e "${VERDE}Forwarders del DNS Configurado, creando zonas del DNS.${RESET}"
@@ -155,6 +164,7 @@ fi
 ## Copiar los archivos de las zonas y editarlas ##
 echo -e "${AZUL}Copiando archivos de plantilla db. ...${RESET}"
 cp db.local /etc/bind/zones/db.${nombrePagina}.conf && cp db.127 /etc/bind/zones/db.${dirIPInv}
+
 #############
 ## Editar la zona directa y inversa ##
 echo -e "${AZUL}Editando zona directa y inversa...${RESET}"
@@ -167,8 +177,9 @@ sed -i $"14c\\${equipo}\tIN\tA\t${IP}" "db.${nombrePagina}.conf"
 echo -e "www\tIN\tCNAME\t${nombreCompleto}." >> "db.${nombrePagina}.conf"
 echo -e "${VERDE}¡Zona directa configurada!${RESET}"
 echo -e "${AZUL}Configurando zona inversa...${RESET}"
-##
 
+#############
+## Configuración de IP Inversa y finalización
 sed -i $"5c\\@\tIN\tSOA\t${equipo}.${nombreCompleto}.\troot.${nombreCompleto}.  (" "db.${dirIPInv}"
 sed -i $"6c\\\t\t\t    100\t\t; Serial" "db.${dirIPInv}"
 sed -i $"12c\\@\tIN\tNS\t${equipo}.${nombreCompleto}." "db.${dirIPInv}"
@@ -179,3 +190,5 @@ sed -i $"13c\\${dirInvHost}\tIN\tPTR\t${equipo}.${nombreCompleto}." "db.${dirIPI
 recargar "bind9"
 echo -e "${VERDE}¡Zona inversa configurada y bind9 recargado!${RESET}"
 echo -e "${VERDE}¡Proceso finalizado!${RESET}"
+
+###############
